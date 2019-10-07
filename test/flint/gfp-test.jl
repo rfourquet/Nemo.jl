@@ -57,6 +57,9 @@
    S = GF(fmpz(19), cached = false)
    T = GF(fmpz(19), cached = false)
    @test !(S === T)
+
+   @test_throws MethodError GF(big(3))
+   @test_throws MethodError GF(0x3)
 end
 
 @testset "gfp.rand..." begin
