@@ -208,7 +208,7 @@ end
 end
 
 @testset "fmpz_abs_series.adhoc_exact_division..." begin
-   R, x = PowerSeriesRing(ZZ, "x", model=:capped_absolute)
+   R, x = PowerSeriesRing(ZZ, 30, "x", model=:capped_absolute)
 
    a = x + x^3
    b = O(x^4)
