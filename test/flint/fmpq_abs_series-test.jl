@@ -276,7 +276,7 @@ end
 end
 
 @testset "fmpq_abs_series.adhoc_exact_division..." begin
-   R, x = PolynomialRing(QQ, "x", model=:capped_absolute)
+   R, x = PowerSeriesRing(QQ, "x", model=:capped_absolute)
 
    a = x + x^3
    b = O(x^4)
