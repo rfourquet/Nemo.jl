@@ -325,7 +325,7 @@ end
 end
 
 @testset "fmpz_rel_series.adhoc_exact_division..." begin
-   R, x = PolynomialRing(ZZ, "x")
+   R, x = PowerSeriesRing(ZZ, 30, "x")
 
    a = x + x^3
    b = O(x^4)
