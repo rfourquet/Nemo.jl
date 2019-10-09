@@ -226,7 +226,7 @@ end
 
 @testset "fq_nmod_abs_series.adhoc_exact_division..." begin
    S, t = FiniteField(23, 5, "t")
-   R, x = PolynomialRing(ZZ, "x", model=:capped_absolute)
+   R, x = PowerSeriesRing(ZZ, 30, "x", model=:capped_absolute)
 
    a = x + x^3
    b = O(x^4)
