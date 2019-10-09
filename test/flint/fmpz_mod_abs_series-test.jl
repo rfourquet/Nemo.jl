@@ -222,7 +222,7 @@ end
 
 @testset "fmpz_mod_abs_series.adhoc_exact_division..." begin
    S = ResidueRing(ZZ, 123456789012345678949)
-   R, x = PolynomialRing(ZZ, "x", model=:capped_absolute)
+   R, x = PowerSeriesRing(ZZ, 30, "x", model=:capped_absolute)
 
    a = x + x^3
    b = O(x^4)
