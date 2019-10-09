@@ -642,7 +642,7 @@ end
 
    B = @inferred sub(A, 1, 1, 2, 2)
 
-   @test typeof(B) == nmod_mat
+   @test typeof(B) == fq_nmod_mat
    @test B == MatrixSpace(F17, 2, 2)([1 2; 4 5])
 
    B[1, 1] = 10
@@ -650,7 +650,7 @@ end
 
    C = @inferred sub(B, 1:2, 1:2)
 
-   @test typeof(C) == nmod_mat
+   @test typeof(C) == fq_nmod_mat
    @test C == MatrixSpace(F17, 2, 2)([10 2; 4 5])
 
    C[1, 1] = 20
