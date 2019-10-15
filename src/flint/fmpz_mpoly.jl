@@ -725,6 +725,8 @@ end
    
 # Return Julia array of Int's corresponding to exponent vector of i-th term
 function exponent_vector(a::fmpz_mpoly, i::Int)
+   exponent_vector_fits_int(a, i) ||
+      throw(DomainError(term(a, i), "exponents don't fit in `Int` (try exponent_vector_fmpz)"))
    z = Vector{Int}(undef, nvars(parent(a)))
    ccall((:fmpz_mpoly_get_term_exp_ui, :libflint), Nothing,
          (Ptr{Int}, Ref{fmpz_mpoly}, Int, Ref{FmpzMPolyRing}),
