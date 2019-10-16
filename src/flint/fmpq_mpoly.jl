@@ -807,7 +807,7 @@ function exponent_vector(a::fmpq_mpoly, i::Int)
    exponent_vector_fits_int(a, i) ||
       throw(DomainError(term(a, i), "exponents don't fit in `Int` (try exponent_vector_fmpz)"))
    z = Vector{Int}(undef, nvars(parent(a)))
-   ccall((:fmpq_mpoly_get_term_exp_ui, :libflint), Nothing,
+   ccall((:fmpq_mpoly_get_term_exp_si, :libflint), Nothing,
          (Ptr{Int}, Ref{fmpq_mpoly}, Int, Ref{FmpqMPolyRing}),
       z, a, i - 1, parent(a))
    return z
