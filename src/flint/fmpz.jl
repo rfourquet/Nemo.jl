@@ -261,6 +261,11 @@ function abs(x::fmpz)
     return z
 end
 
+function Base.exp(x::fmpz)
+   x != 0 && throw(DomainError(x, "exponential of nonzero element"))
+   return one(x)
+end
+
 ###############################################################################
 #
 #   Binary operators and functions
@@ -313,6 +318,10 @@ function rem(x::fmpz, c::fmpz)
           (Ref{fmpz}, Ref{fmpz}, Ref{fmpz}, Ref{fmpz}), q, r, x, abs(c))
     return r
 end
+
+# necessary for sorting an Vector{fmpz}
+Base.add_with_overflow(x::fmpz, y::fmpz) = (x + y, false)
+Base.sub_with_overflow(x::fmpz, y::fmpz) = (x - y, false)
 
 ###############################################################################
 #
@@ -1698,7 +1707,11 @@ convert(::Type{Float16}, n::fmpz) = Float16(n)
 
 (::Type{BigFloat})(n::fmpz) = BigFloat(BigInt(n))
 
+Base.AbstractFloat(n::fmpz) = BigFloat(n)
+
 convert(::Type{BigFloat}, n::fmpz) = BigFloat(n)
+
+Base.widen(a::fmpz) = a
 
 Base.promote_rule(::Type{fmpz}, ::Type{T}) where {T <: Integer} = fmpz
 
