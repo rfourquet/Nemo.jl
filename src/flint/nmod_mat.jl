@@ -33,15 +33,17 @@ end
 
 ###############################################################################
 #
-#   Similar
+#   Similar & zero
 #
 ###############################################################################
 
-function similar(::MatElem, R::NmodRing, r::Int, c::Int)
+function similar(::nmod_mat, R::NmodRing, r::Int, c::Int)
    z = nmod_mat(r, c, R.n)
    z.base_ring = R
    return z
 end
+
+zero(m::nmod_mat, R::NmodRing, r::Int, c::Int) = similar(m, R, r, c)
 
 ################################################################################
 #
@@ -132,7 +134,7 @@ base_ring(a::T) where T <: Zmodn_mat = a.base_ring
 zero(a::NmodMatSpace) = a()
 
 function one(a::NmodMatSpace)
-  (nrows(a) != ncols(a)) && error("Matrices must be quadratic")
+  (nrows(a) != ncols(a)) && error("Matrices must be square")
   z = a()
   ccall((:nmod_mat_one, :libflint), Nothing, (Ref{nmod_mat}, ), z)
   return z
@@ -345,7 +347,7 @@ end
 function ^(x::T, y::fmpz) where T <: Zmodn_mat
   ( y < 0 ) && error("Exponent must be positive")
   ( y > fmpz(typemax(UInt))) &&
-          error("Exponent must be smaller then ", fmpz(typemax(UInt)))
+          error("Exponent must be smaller than ", fmpz(typemax(UInt)))
   return x^(UInt(y))
 end
 
@@ -410,7 +412,7 @@ end
 
 function det(a::nmod_mat)
   !issquare(a) && error("Matrix must be a square matrix")
-  if is_prime(a.n)
+  if isprime(a.n)
      r = ccall((:nmod_mat_det, :libflint), UInt, (Ref{nmod_mat}, ), a)
      return base_ring(a)(r)
   else
@@ -848,7 +850,3 @@ function MatrixSpace(R::NmodRing, r::Int, c::Int, cached::Bool = true)
   NmodMatSpace(R, r, c, cached)
 end
 
-function MatrixSpace(R::Generic.ResRing{fmpz}, r::Int, c::Int, cached::Bool = true)
-  T = elem_type(R)
-  return Generic.MatSpace{T}(R, r, c, cached)
-end

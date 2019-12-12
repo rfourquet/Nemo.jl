@@ -119,7 +119,10 @@ return of the quotient and $r$ representing return of the remainder.
 
 Function                    | Return | Rounding
 ----------------------------|--------|------------------------
-`divrem(a::fmpz, b::fmpz)`  | q, r   | towards zero 
+`mod`                       | r      | towards minus infinity
+`rem`                       | r      | towards zero
+`div`                       | q      | towards minus infinity
+`divrem(a::fmpz, b::fmpz)`  | q, r   | towards minus infinity 
 `tdivrem(a::fmpz, b::fmpz)` | q, r   | towards zero
 `fdivrem(a::fmpz, b::fmpz)` | q, r   | towards minus infinity 
 
@@ -128,6 +131,7 @@ description is as for the other Euclidean division functions.
 
 Function                    | Return | Rounding
 ----------------------------|--------|------------------------
+`mod(a::fmpz, b::Int)`      | r      | towards minus infinity
 `rem(a::fmpz, b::Int)`      | r      | towards zero
 `div(a::fmpz, b::Int)`      | q      | towards zero
 `tdiv(a::fmpz, b::Int)`     | q      | towards zero
@@ -311,59 +315,68 @@ divisor_lenstra(::fmpz, ::fmpz, ::fmpz)
 ```
 
 ```@docs
-fac(::Int)
+factorial(::fmpz)
 ```
 
 ```@docs
-risingfac(::fmpz, ::Int)
-risingfac(::Int, ::Int)
+rising_factorial(::fmpz, ::fmpz)
+rising_factorial(::fmpz, ::Int)
+rising_factorial(::Int, ::Int)
 ```
 
 ```@docs
+primorial(::fmpz)
 primorial(::Int)
 ```
 
 ```@docs
-fib(::Int)
+fibonacci(::Int)
+fibonacci(::fmpz)
 ```
 
 ```@docs
+bell(:fmpz)
 bell(::Int)
 ```
 
 ```@docs
-binom(::Int, ::Int)
+binomial(::fmpz, ::fmpz)
 ```
 
 ```@docs
-moebiusmu(::fmpz)
+moebius_mu(::Int)
+moebius_mu(::fmpz)
 ```
 
 ```@docs
-jacobi(::fmpz, ::fmpz)
+jacobi_symbol(::Int, ::Int)
+jacobi_symbol(::fmpz, ::fmpz)
 ```
 
 ```@docs
-sigma(::fmpz, ::Int)
+divisor_sigma(::Int, ::Int)
+divisor_sigma(::fmpz, ::Int)
+divisor_sigma(::fmpz, ::fmpz)
 ```
 
 ```@docs
-eulerphi(::fmpz)
+euler_phi(::Int)
+euler_phi(::fmpz)
 ```
 
 ```@docs
-numpart(::Int)
-numpart(::fmpz) 
+number_of_partitions(::Int)
+number_of_partitions(::fmpz) 
 ```
 
 **Examples**
 
 ```julia
 isprime(ZZ(13))
-n = fac(100)
-s = sigma(ZZ(128), 10)
-a = eulerphi(ZZ(12480))
-p = numpart(1000)
+n = factorial(ZZ(100))
+s = divisor_sigma(ZZ(128), 10)
+a = euler_phi(ZZ(12480))
+p = number_of_partitions(ZZ(1000))
 f = factor(ZZ(12))
 ```
 

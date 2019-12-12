@@ -5,6 +5,7 @@ makedocs(
          sitename = "Nemo.jl",
          modules = [Nemo],
          clean = true,
+         checkdocs = :none,
          doctest = false,
          pages    = [
              "index.md",
@@ -23,6 +24,7 @@ makedocs(
                            "acb.md",
                            "gfp.md",
                            "finitefield.md",
+			   "ff_embedding.md",
                            "numberfield.md",
                            "padic.md",
                            "qadic.md"],

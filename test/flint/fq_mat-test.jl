@@ -193,12 +193,16 @@ end
 
    for (R, M) in ring_to_mat
       t = similar(s, R)
-      @test t isa M
       @test size(t) == size(s)
 
       t = similar(s, R, 2, 3)
-      @test t isa M
       @test size(t) == (2, 3)
+   end
+
+   # issue #651
+   m = one(Generic.MatSpace{fq}(F9, 2, 2, false))
+   for n = (m, -m, m*m, m+m, 2m)
+      @test n isa Generic.MatSpaceElem{fq}
    end
 end
 
@@ -634,30 +638,28 @@ end
   @test t[1, 1] == 2
 end
 
-if false
-   @testset "fq_mat.sub..." begin
-      F17, _ = FiniteField(fmpz(17), 1, "a")
-      S = MatrixSpace(F17, 3, 3)
+@testset "fq_mat.sub..." begin
+   F17, _ = FiniteField(fmpz(17), 1, "a")
+   S = MatrixSpace(F17, 3, 3)
 
-      A = S([1 2 3; 4 5 6; 7 8 9])
+   A = S([1 2 3; 4 5 6; 7 8 9])
 
-      B = @inferred sub(A, 1, 1, 2, 2)
+   B = @inferred sub(A, 1, 1, 2, 2)
 
-      @test typeof(B) == nmod_mat
-      @test B == MatrixSpace(F17, 2, 2)([1 2; 4 5])
+   @test typeof(B) == fq_mat
+   @test B == MatrixSpace(F17, 2, 2)([1 2; 4 5])
 
-      B[1, 1] = 10
-      @test A == S([1 2 3; 4 5 6; 7 8 9])
+   B[1, 1] = 10
+   @test A == S([1 2 3; 4 5 6; 7 8 9])
 
-      C = @inferred sub(B, 1:2, 1:2)
+   C = @inferred sub(B, 1:2, 1:2)
 
-      @test typeof(C) == nmod_mat
-      @test C == MatrixSpace(F17, 2, 2)([10 2; 4 5])
+   @test typeof(C) == fq_mat
+   @test C == MatrixSpace(F17, 2, 2)([10 2; 4 5])
 
-      C[1, 1] = 20
-      @test B == MatrixSpace(F17, 2, 2)([10 2; 4 5])
-      @test A == S([1 2 3; 4 5 6; 7 8 9])
-   end
+   C[1, 1] = 20
+   @test B == MatrixSpace(F17, 2, 2)([10 2; 4 5])
+   @test A == S([1 2 3; 4 5 6; 7 8 9])
 end
 
 @testset "fq_mat.concatenation..." begin

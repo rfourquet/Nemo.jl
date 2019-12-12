@@ -152,6 +152,8 @@ function denominator(a::fmpq_mpoly)
   return c
 end
 
+characteristic(::FmpqMPolyRing) = 0
+
 ################################################################################
 #
 #  Getting coefficients
@@ -724,6 +726,19 @@ end
 #   Unsafe functions
 #
 ###############################################################################
+
+function zero!(a::fmpq_mpoly)
+    ccall((:fmpq_mpoly_zero, :libflint), Nothing,
+         (Ref{fmpq_mpoly}, Ref{FmpqMPolyRing}), a, a.parent)
+    return a
+end
+
+function add!(a::fmpq_mpoly, b::fmpq_mpoly, c::fmpq_mpoly)
+   ccall((:fmpq_mpoly_add, :libflint), Nothing,
+         (Ref{fmpq_mpoly}, Ref{fmpq_mpoly},
+          Ref{fmpq_mpoly}, Ref{FmpqMPolyRing}), a, b, c, a.parent)
+   return a
+end
 
 function addeq!(a::fmpq_mpoly, b::fmpq_mpoly)
    ccall((:fmpq_mpoly_add, :libflint), Nothing,

@@ -8,7 +8,7 @@
 
    @test typeof(S) <: GFPFmpzPolyRing
 
-   @test isa(x, PolyElem{Generic.ResF{fmpz}})
+   @test isa(x, PolyElem{Nemo.gfp_fmpz_elem})
 
    f = x^3 + 2x^2 + x + 1
 
@@ -101,6 +101,8 @@ end
    @test modulus(x) == 123456789012345678949
 
    @test modulus(R) == 123456789012345678949
+
+   @test characteristic(S) == 123456789012345678949
 end
 
 @testset "gfp_fmpz_poly.binary_ops..." begin

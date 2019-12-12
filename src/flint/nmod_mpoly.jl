@@ -136,6 +136,8 @@ function isconstant(a::nmod_mpoly)
    return Bool(b)
 end
 
+characteristic(R::NmodMPolyRing) = characteristic(base_ring(R))
+
 ################################################################################
 #
 #  Getting coefficients
@@ -695,6 +697,19 @@ end
 #   Unsafe functions
 #
 ###############################################################################
+
+function zero!(a::nmod_mpoly)
+    ccall((:nmod_mpoly_zero, :libflint), Nothing,
+         (Ref{nmod_mpoly}, Ref{NmodMPolyRing}), a, a.parent)
+    return a
+end
+
+function add!(a::nmod_mpoly, b::nmod_mpoly, c::nmod_mpoly)
+   ccall((:nmod_mpoly_add, :libflint), Nothing,
+         (Ref{nmod_mpoly}, Ref{nmod_mpoly},
+          Ref{nmod_mpoly}, Ref{NmodMPolyRing}), a, b, c, a.parent)
+   return a
+end
 
 function addeq!(a::nmod_mpoly, b::nmod_mpoly)
    ccall((:nmod_mpoly_add, :libflint), Nothing,

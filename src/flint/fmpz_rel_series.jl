@@ -105,6 +105,8 @@ function renormalize!(z::fmpz_rel_series)
    return nothing
 end
 
+characteristic(::FmpzRelSeriesRing) = 0
+
 ###############################################################################
 #
 #   String I/O
@@ -281,6 +283,10 @@ function *(x::fmpz, y::fmpz_rel_series)
 end
 
 *(x::fmpz_rel_series, y::fmpz) = y * x
+
+*(x::Integer, y::fmpz_rel_series) = fmpz(x)*y
+
+*(x::fmpz_rel_series, y::Integer) = y*x
 
 ###############################################################################
 #

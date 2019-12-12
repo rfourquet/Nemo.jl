@@ -33,11 +33,12 @@ end
 
 ###############################################################################
 #
-#   Similar
+#   Similar & zero
 #
 ###############################################################################
 
-similar(::MatElem, R::FqFiniteField, r::Int, c::Int) = fq_mat(r, c, R)
+similar(::fq_mat, R::FqFiniteField, r::Int, c::Int) = fq_mat(r, c, R)
+zero(m::fq_mat, R::FqFiniteField, r::Int, c::Int) = fq_mat(r, c, R)
 
 ################################################################################
 #
@@ -100,7 +101,7 @@ base_ring(a::fq_mat) = a.base_ring
 zero(a::FqMatSpace) = a()
 
 function one(a::FqMatSpace)
-  (nrows(a) != ncols(a)) && error("Matrices must be quadratic")
+  (nrows(a) != ncols(a)) && error("Matrices must be square")
   return a(one(base_ring(a)))
 end
 

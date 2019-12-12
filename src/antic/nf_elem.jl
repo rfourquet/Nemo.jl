@@ -51,6 +51,8 @@ end
 
 show_minus_one(::Type{nf_elem}) = false
 
+characteristic(::AnticNumberField) = 0
+
 ###############################################################################
 #
 #   Basic manipulation
@@ -777,9 +779,9 @@ end
 
 @doc Markdown.doc"""
     mul_red!(z::nf_elem, x::nf_elem, y::nf_elem, red::Bool)
-> Multiply $a$ by $b$ and set the existing number field element $c$ to the
+> Multiply $x$ by $y$ and set the existing number field element $z$ to the
 > result. Reduction modulo the defining polynomial is only performed if `red` is
-> set to `true`. Note that $a$ and $b$ must be reduced. This function is provided
+> set to `true`. Note that $x$ and $y$ must be reduced. This function is provided
 > for performance reasons as it saves allocating a new object for the result and
 > eliminates associated garbage collection.
 """

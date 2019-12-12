@@ -48,6 +48,8 @@ end
    @test valuation(a) == 1
 
    @test valuation(b) == 4
+
+   @test characteristic(R) == 0
 end
 
 @testset "fmpz_abs_series.unary_ops..." begin
@@ -89,6 +91,8 @@ end
    d = x^2 + 3x^3 - x^4
 
    @test 2a == 4x + 2x^3
+
+   @test Int128(2)*a == 4x + 2x^3
 
    @test ZZ(3)*b == O(x^4)
 
@@ -207,25 +211,23 @@ end
    @test divexact(d, c) == -2*x^5+2*x^4-x^2+x+O(x^6)
 end
 
-if false
-   @testset "fmpz_abs_series.adhoc_exact_division..." begin
-      R, x = PolynomialRing(ZZ, "x", model=:capped_absolute)
+@testset "fmpz_abs_series.adhoc_exact_division..." begin
+   R, x = PowerSeriesRing(ZZ, 30, "x", model=:capped_absolute)
 
-      a = x + x^3
-      b = O(x^4)
-      c = 1 + x + 2x^2 + O(x^5)
-      d = x + x^3 + O(x^6)
+   a = x + x^3
+   b = O(x^4)
+   c = 1 + x + 2x^2 + O(x^5)
+   d = x + x^3 + O(x^6)
 
-      @test isequal(divexact(7a, 7), a)
+   @test isequal(divexact(7a, 7), a)
 
-      @test isequal(divexact(11b, fmpz(11)), b)
+   @test isequal(divexact(11b, fmpz(11)), b)
 
-      @test isequal(divexact(2c, fmpz(2)), c)
+   @test isequal(divexact(2c, fmpz(2)), c)
 
-      @test isequal(divexact(9d, 9), d)
+   @test isequal(divexact(9d, 9), d)
 
-      @test isequal(divexact(94872394861923874346987123694871329847a, 94872394861923874346987123694871329847), a)
-   end
+   @test isequal(divexact(94872394861923874346987123694871329847a, 94872394861923874346987123694871329847), a)
 end
 
 @testset "fmpz_abs_series.inversion..." begin

@@ -237,6 +237,8 @@ function total_degree_fmpz(a::fmpz_mpoly)
    return d
 end
 
+characteristic(::FmpzMPolyRing) = 0
+
 ###############################################################################
 #
 #   Multivariable coefficient polynomials
@@ -383,9 +385,17 @@ for (jT, cN, cT) in ((fmpz, :fmpz, Ref{fmpz}), (Int, :si, Int))
 
       function divexact(a::fmpz_mpoly, b::($jT))
          z = parent(a)()
-         ccall(($(string(:fmpz_mpoly_scalar_div_, cN)), :libflint), Nothing,
-               (Ref{fmpz_mpoly}, Ref{fmpz_mpoly}, ($cT), Ref{FmpzMPolyRing}),
-               z, a, b, parent(a))
+         checked = true
+         if checked
+            divides = Bool(ccall(($(string(:fmpz_mpoly_scalar_divides_, cN)), :libflint), Cint,
+                                 (Ref{fmpz_mpoly}, Ref{fmpz_mpoly}, ($cT), Ref{FmpzMPolyRing}),
+                                 z, a, b, parent(a)))
+            divides || error("Division is not exact in divexact")
+         else
+            ccall(($(string(:fmpz_mpoly_scalar_divexact_, cN)), :libflint), Nothing,
+                  (Ref{fmpz_mpoly}, Ref{fmpz_mpoly}, ($cT), Ref{FmpzMPolyRing}),
+                  z, a, b, parent(a))
+         end
          return z
       end
    end
@@ -654,6 +664,19 @@ end
 #   Unsafe functions
 #
 ###############################################################################
+
+function zero!(a::fmpz_mpoly)
+    ccall((:fmpz_mpoly_zero, :libflint), Nothing,
+         (Ref{fmpz_mpoly}, Ref{FmpzMPolyRing}), a, a.parent)
+    return a
+end
+
+function add!(a::fmpz_mpoly, b::fmpz_mpoly, c::fmpz_mpoly)
+   ccall((:fmpz_mpoly_add, :libflint), Nothing,
+         (Ref{fmpz_mpoly}, Ref{fmpz_mpoly},
+          Ref{fmpz_mpoly}, Ref{FmpzMPolyRing}), a, b, c, a.parent)
+   return a
+end
 
 function addeq!(a::fmpz_mpoly, b::fmpz_mpoly)
    ccall((:fmpz_mpoly_add, :libflint), Nothing,

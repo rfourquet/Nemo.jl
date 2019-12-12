@@ -57,6 +57,9 @@ end
    @test Float32(a) == Float32(-123)
    @test Float16(a) == Float16(-123)
    @test BigFloat(a) == BigFloat(-123)
+
+   @test_throws InexactError Int(fmpz(1234484735687346876324432764872))
+   @test_throws InexactError UInt(fmpz(typemin(Int)))
 end
 
 @testset "fmpz.manipulation..." begin
@@ -86,6 +89,16 @@ end
    @test numerator(fmpz(12)) == fmpz(12)
 
    @test denominator(fmpz(12)) == fmpz(1)
+
+   @test iseven(fmpz(12))
+   @test isodd(fmpz(13))
+   b = big(2)
+   x = rand(-b^rand(1:1000):b^rand(1:1000))
+   y = fmpz(x)
+   @test iseven(x) == iseven(y)
+   @test isodd(x) == isodd(y)
+
+   @test characteristic(ZZ) == 0
 end
 
 @testset "fmpz.binary_ops..." begin
@@ -126,6 +139,8 @@ end
 
    @test mod(b, a) == 2
 
+   @test mod(fmpz(3), fmpz(-2)) == fmpz(-1)
+
    @test rem(b, a) == 2
 
    @test mod(b, 12) == 2
@@ -135,6 +150,7 @@ end
 
 @testset "fmpz.exact_division..." begin
    @test divexact(fmpz(24), fmpz(12)) == 2
+   @test_throws ArgumentError divexact(fmpz(24), fmpz(11))
 end
 
 @testset "fmpz.gcd_lcm..." begin
@@ -142,6 +158,8 @@ end
    b = fmpz(26)
 
    @test gcd(a, b) == 2
+   @test gcd(a, 26) == 2
+   @test gcd(12, b) == 2
 
    @test_throws ErrorException gcd(fmpz[])
 
@@ -154,6 +172,8 @@ end
    @test gcd([fmpz(9), fmpz(27), fmpz(3)]) == 3
 
    @test lcm(a, b) == 156
+   @test lcm(12, b) == 156
+   @test lcm(a, 26) == 156
 
    @test_throws ErrorException lcm(fmpz[])
 
@@ -220,7 +240,13 @@ end
 
    @test mod(-12, fmpz(3)) == 0
 
+   @test isa(mod(fmpz(2), -3), fmpz)
+
+   @test mod(fmpz(2), -3) == -1
+
    @test rem(-12, fmpz(3)) == 0
+
+   @test_throws ArgumentError divexact(ZZ(2), 3)
 end
 
 @testset "fmpz.shift.." begin
@@ -247,6 +273,36 @@ end
    a = fmpz(-12)
 
    @test a^5 == -248832
+
+   @test a^1 == a
+   @test a^1 !== a
+
+   @test isone(a^0)
+
+   for a in fmpz.(-5:5)
+      for e = -5:-1
+         if a != 1 && a != -1
+            @test_throws DomainError a^e
+         end
+      end
+      @test a^1 == a
+      @test a^1 !== a
+   end
+
+   a = fmpz(1)
+   for e = -2:2
+      @test isone(a^e)
+      @test a^e !== a
+   end
+
+   a = fmpz(-1)
+   for e = [-3, -1, 1, 3, 5]
+      @test a^e == a
+      @test a^e !== a
+   end
+   for e = [-2, 0, 2, 4]
+      @test isone(a^e )
+   end
 end
 
 @testset "fmpz.comparison..." begin
@@ -270,6 +326,10 @@ end
    @test cmpabs(a, b) == 1
 
    @test cmp(a, b) == -1
+
+   @test fmpz(2) < 47632748687326487326487326487326
+
+   @test fmpz(2) < 476327486873264873264873264873264837624982
 end
 
 @testset "fmpz.adhoc_comparison..." begin
@@ -362,12 +422,22 @@ end
 
 @testset "fmpz.extended_gcd..." begin
    @test gcdx(fmpz(12), fmpz(5)) == (1, -2, 5)
+   @test gcdx(fmpz(12), 5) == (1, -2, 5)
+   @test gcdx(12, fmpz(5)) == (1, -2, 5)
 
    @test gcdinv(fmpz(5), fmpz(12)) == (1, 5)
+   @test gcdinv(fmpz(5), 12) == (1, 5)
+   @test gcdinv(5, fmpz(12)) == (1, 5)
 
    @test_throws DomainError gcdinv(-fmpz(5), fmpz(12))
 
    @test_throws DomainError gcdinv(fmpz(13), fmpz(12))
+
+   for i = -10:10
+      for j = -10:10
+         @test gcdx(fmpz(i), fmpz(j)) == gcdx(i, j)
+      end
+   end
 end
 
 @testset "fmpz.bit_twiddling..." begin
@@ -488,7 +558,7 @@ end
    b, f = Nemo.ecm(n)
    @test mod(n, f) == 0
 
-   n = fac(50)
+   n = factorial(ZZ(50))
    d, u = Nemo._factor_trial_range(n, 0, 50)
    @test isone(u)
    @test prod(p^e for (p, e) in d) == n
@@ -497,21 +567,33 @@ end
 @testset "fmpz.number_theoretic..." begin
    @test isprime(fmpz(13))
 
-   @test isprobabprime(fmpz(13))
+   @test isprime(13)
+
+   @test isprobable_prime(fmpz(13))
 
    @test divisible(fmpz(12), fmpz(6))
 
    @test issquare(fmpz(36))
 
-   @test fac(100) == fmpz("93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000")
+   @test factorial(ZZ(100)) == fmpz("93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000")
 
-   @test sigma(fmpz(128), 10) == fmpz("1181745669222511412225")
+   @test divisor_sigma(fmpz(128), 10) == fmpz("1181745669222511412225")
 
-   @test_throws DomainError sigma(fmpz(1), -1)
+   @test_throws DomainError divisor_sigma(fmpz(1), -1)
 
-   @test eulerphi(fmpz(12480)) == 3072
+   @test euler_phi(fmpz(12480)) == 3072
 
-   @test_throws DomainError  eulerphi(-fmpz(12480))
+   @test fibonacci(2) == 1
+
+   @test fibonacci(0) == 0
+
+   @test fibonacci(-2) == -1
+
+   @test fibonacci(fmpz(2)) == 1
+
+   @test fibonacci(fmpz(-2)) == -1
+
+   @test_throws DomainError  euler_phi(-fmpz(12480))
 
    @test remove(fmpz(12), fmpz(2)) == (2, 3)
 
@@ -527,44 +609,51 @@ end
    @test_throws DomainError divisor_lenstra(fmpz(1), fmpz(4), fmpz(5))
    @test_throws DomainError divisor_lenstra(fmpz(10), fmpz(4), fmpz(3))
 
-   @test risingfac(fmpz(12), 5) == 524160
+   @test rising_factorial(fmpz(12), 5) == 524160
 
-   @test_throws DomainError risingfac(fmpz(12), -1)
+   @test_throws DomainError rising_factorial(fmpz(12), -1)
 
-   @test risingfac(12, 5) == 524160
+   @test rising_factorial(12, 5) == 524160
 
-   @test_throws DomainError risingfac(12, -1)
+   @test_throws DomainError rising_factorial(12, -1)
 
    @test primorial(7) == 210
 
    @test_throws DomainError primorial(-7)
 
-   @test binom(12, 5) == 792
+   @test binomial(ZZ(12), ZZ(5)) == 792
 
    @test bell(12) == 4213597
 
    @test_throws DomainError bell(-1)
 
-   @test moebiusmu(fmpz(13)) == -1
+   @test moebius_mu(fmpz(13)) == -1
 
-   @test_throws DomainError moebiusmu(-fmpz(1))
+   @test_throws DomainError moebius_mu(-fmpz(1))
 
-   @test jacobi(fmpz(2), fmpz(5)) == -1
+   @test jacobi_symbol(fmpz(2), fmpz(5)) == -1
 
-   @test_throws DomainError jacobi(fmpz(5), fmpz(2))
+   @test_throws DomainError jacobi_symbol(fmpz(5), fmpz(-2))
 
-   @test_throws DomainError jacobi(-fmpz(5), fmpz(2))
+   @test_throws DomainError jacobi_symbol(fmpz(5), fmpz(2))
+
+   @test jacobi_symbol(2, 3) == -1
+
+   @test_throws DomainError jacobi_symbol(2, 0)
+
+   @test_throws DomainError jacobi_symbol(-5, 4)
 
    if !Nemo.iswindows64()
 
-      @test numpart(10) == 42
+      @test number_of_partitions(10) == 42
 
-      @test_throws DomainError numpart(-10)
+      @test number_of_partitions(fmpz(1000)) == fmpz("24061467864032622473692149727991")
 
-      @test numpart(fmpz(1000)) == fmpz("24061467864032622473692149727991")
+      @test number_of_partitions(0) == 1
 
-      @test_throws DomainError numpart(-fmpz(1000))
+      @test number_of_partitions(-1) == 0
 
+      @test number_of_partitions(fmpz(-2)) == 0
    end
 end
 

@@ -113,6 +113,8 @@ function valuation(a::fmpz_abs_series)
    return precision(a)
 end
 
+characteristic(::FmpzAbsSeriesRing) = 0
+
 ###############################################################################
 #
 #   AbstractString I/O
@@ -124,7 +126,7 @@ function show(io::IO, a::FmpzAbsSeriesRing)
    show(io, base_ring(a))
 end
 
-show_minus_one(::Type{fmpz_abs_series}) = show_minus_one(GenRes{fmpz})
+show_minus_one(::Type{fmpz_abs_series}) = show_minus_one(fmpz)
 
 ###############################################################################
 #
@@ -241,6 +243,10 @@ function *(x::fmpz, y::fmpz_abs_series)
 end
 
 *(x::fmpz_abs_series, y::fmpz) = y * x
+
+*(x::Integer, y::fmpz_abs_series) = fmpz(x)*y                                            
+
+*(x::fmpz_abs_series, y::Integer) = y*x
 
 ###############################################################################
 #

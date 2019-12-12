@@ -76,6 +76,8 @@ function deepcopy_internal(a::T, dict::IdDict) where {T <: Zmodn_fmpz_poly}
   return z
 end
 
+characteristic(R::ZmodNFmpzPolyRing) = modulus(R)
+
 ################################################################################
 #
 #  AbstractString I/O
@@ -215,12 +217,12 @@ end
 
 *(x::Integer, y::fmpz_mod_poly) = y*x
 
-function *(x::fmpz_mod_poly, y::Generic.Res{fmpz})
+function *(x::fmpz_mod_poly, y::fmpz_mod)
   (base_ring(x) != parent(y)) && error("Must have same parent")
   return x*y.data
 end
 
-*(x::Generic.Res{fmpz}, y::fmpz_mod_poly) = y*x
+*(x::fmpz_mod, y::fmpz_mod_poly) = y*x
 
 function +(x::fmpz_mod_poly, y::Int)
   z = parent(x)()
@@ -244,12 +246,12 @@ end
 
 +(x::Integer, y::fmpz_mod_poly) = fmpz(y) + x
 
-function +(x::fmpz_mod_poly, y::Generic.Res{fmpz})
+function +(x::fmpz_mod_poly, y::fmpz_mod)
   (base_ring(x) != parent(y)) && error("Elements must have same parent")
   return x + y.data
 end
 
-+(x::Generic.Res{fmpz}, y::fmpz_mod_poly) = y + x
++(x::fmpz_mod, y::fmpz_mod_poly) = y + x
 
 function -(x::fmpz_mod_poly, y::Int)
   z = parent(x)()
@@ -283,12 +285,12 @@ end
 
 -(x::Integer, y::fmpz_mod_poly) = fmpz(x) - y
 
-function -(x::fmpz_mod_poly, y::Generic.Res{fmpz})
+function -(x::fmpz_mod_poly, y::fmpz_mod)
   (base_ring(x) != parent(y)) && error("Elements must have same parent")
   return x - y.data
 end
 
-function -(x::Generic.Res{fmpz}, y::fmpz_mod_poly)
+function -(x::fmpz_mod, y::fmpz_mod_poly)
    (parent(x) != base_ring(y)) && error("Elements must have same parent")
    return x.data - y
 end
@@ -325,7 +327,7 @@ end
 #
 ################################################################################
 
-function ==(x::fmpz_mod_poly, y::Generic.Res{fmpz})
+function ==(x::fmpz_mod_poly, y::fmpz_mod)
   base_ring(x) != parent(y) && error("Incompatible base rings in comparison")
   if length(x) > 1
      return false
@@ -339,7 +341,7 @@ function ==(x::fmpz_mod_poly, y::Generic.Res{fmpz})
   end
 end
 
-==(x::Generic.Res{fmpz}, y::fmpz_mod_poly) = y == x
+==(x::fmpz_mod, y::fmpz_mod_poly) = y == x
 
 ################################################################################
 #
@@ -435,7 +437,7 @@ div(x::T, y::T) where {T <: Zmodn_fmpz_poly} = divexact(x,y)
 #
 ################################################################################
 
-function divexact(x::fmpz_mod_poly, y::Generic.Res{fmpz})
+function divexact(x::fmpz_mod_poly, y::fmpz_mod)
   base_ring(x) != parent(y) && error("Elements must have same parent")
   iszero(y) && throw(DivideError())
   q = parent(x)()
@@ -632,7 +634,7 @@ end
 function resultant(x::T, y::T) where {T <: Zmodn_fmpz_poly}
   check_parent(x,y)
   z = parent(x)()
-  !isprobabprime(modulus(x)) && error("Modulus not prime in resultant")
+  !isprobable_prime(modulus(x)) && error("Modulus not prime in resultant")
   r = fmpz()
   ccall((:fmpz_mod_poly_resultant, :libflint), Nothing,
           (Ref{fmpz}, Ref{T}, Ref{T}), r, x, y)
@@ -645,7 +647,7 @@ end
 #
 ################################################################################
 
-function evaluate(x::fmpz_mod_poly, y::Generic.Res{fmpz})
+function evaluate(x::fmpz_mod_poly, y::fmpz_mod)
   base_ring(x) != parent(y) && error("Elements must have same parent")
   z = fmpz()
   ccall((:fmpz_mod_poly_evaluate_fmpz, :libflint), Nothing,
@@ -674,7 +676,7 @@ end
 
 function integral(x::fmpz_mod_poly)
    len = length(x)
-   v = Vector{Generic.Res{fmpz}}(undef, len + 1)
+   v = Vector{fmpz_mod}(undef, len + 1)
    v[1] = zero(base_ring(x))
    for i = 1:len
       v[i + 1] = divexact(coeff(x, i - 1), base_ring(x)(i))
@@ -728,7 +730,7 @@ end
 > Return `true` if $x$ is irreducible, otherwise return `false`.
 """
 function isirreducible(x::fmpz_mod_poly)
-  !isprobabprime(modulus(x)) && error("Modulus not prime in isirreducible")
+  !isprobable_prime(modulus(x)) && error("Modulus not prime in isirreducible")
   return Bool(ccall((:fmpz_mod_poly_is_irreducible, :libflint), Int32,
           (Ref{fmpz_mod_poly}, ), x))
 end
@@ -744,7 +746,7 @@ end
 > Return `true` if $x$ is squarefree, otherwise return `false`.
 """
 function issquarefree(x::fmpz_mod_poly)
-   !isprobabprime(modulus(x)) && error("Modulus not prime in issquarefree")
+   !isprobable_prime(modulus(x)) && error("Modulus not prime in issquarefree")
    return Bool(ccall((:fmpz_mod_poly_is_squarefree, :libflint), Int32,
       (Ref{fmpz_mod_poly}, ), x))
 end
@@ -760,7 +762,7 @@ end
 > Return the factorisation of $x$.
 """
 function factor(x::fmpz_mod_poly)
-  !isprobabprime(modulus(x)) && error("Modulus not prime in factor")
+  !isprobable_prime(modulus(x)) && error("Modulus not prime in factor")
   fac = _factor(x)
   return Fac(parent(x)(lead(x)), fac)
 end
@@ -785,7 +787,7 @@ end
 > Return the squarefree factorisation of $x$.
 """
 function factor_squarefree(x::fmpz_mod_poly)
-  !isprobabprime(modulus(x)) && error("Modulus not prime in factor_squarefree")
+  !isprobable_prime(modulus(x)) && error("Modulus not prime in factor_squarefree")
   fac = _factor_squarefree(x)
   return Fac(parent(x)(lead(x)), fac)
 end
@@ -811,7 +813,7 @@ end
 """
 function factor_distinct_deg(x::fmpz_mod_poly)
   !issquarefree(x) && error("Polynomial must be squarefree")
-  !isprobabprime(modulus(x)) && error("Modulus not prime in factor_distinct_deg")
+  !isprobable_prime(modulus(x)) && error("Modulus not prime in factor_distinct_deg")
   degs = Vector{Int}(undef, degree(x))
   degss = [ pointer(degs) ]
   fac = fmpz_mod_poly_factor(parent(x).n)
@@ -866,7 +868,7 @@ end
 
 setcoeff!(x::T, n::Int, y::Integer) where {T <: Zmodn_fmpz_poly} = setcoeff!(x, n, fmpz(y))
 
-setcoeff!(x::fmpz_mod_poly, n::Int, y::Generic.Res{fmpz}) = setcoeff!(x, n, y.data)
+setcoeff!(x::fmpz_mod_poly, n::Int, y::fmpz_mod) = setcoeff!(x, n, y.data)
 
 function add!(z::T, x::T, y::T) where {T <: Zmodn_fmpz_poly}
   ccall((:fmpz_mod_poly_add, :libflint), Nothing,
@@ -902,7 +904,7 @@ promote_rule(::Type{T}, ::Type{V}) where {T <: Zmodn_fmpz_poly, V <: Integer} = 
 
 promote_rule(::Type{T}, ::Type{fmpz}) where {T <: Zmodn_fmpz_poly} = T
 
-promote_rule(::Type{fmpz_mod_poly}, ::Type{Generic.Res{fmpz}}) = fmpz_mod_poly
+promote_rule(::Type{fmpz_mod_poly}, ::Type{fmpz_mod}) = fmpz_mod_poly
 
 ###############################################################################
 #
@@ -910,7 +912,7 @@ promote_rule(::Type{fmpz_mod_poly}, ::Type{Generic.Res{fmpz}}) = fmpz_mod_poly
 #
 ###############################################################################
 
-function (f::fmpz_mod_poly)(a::Generic.Res{fmpz})
+function (f::fmpz_mod_poly)(a::fmpz_mod)
    if parent(a) != base_ring(f)
       return subst(f, a)
    end
@@ -941,7 +943,7 @@ function (R::FmpzModPolyRing)(x::Integer)
   return z
 end
 
-function (R::FmpzModPolyRing)(x::Generic.Res{fmpz})
+function (R::FmpzModPolyRing)(x::fmpz_mod)
   base_ring(R) != parent(x) && error("Wrong parents")
   z = fmpz_mod_poly(R.n, x.data)
   z.parent = R
@@ -954,7 +956,7 @@ function (R::FmpzModPolyRing)(arr::Array{fmpz, 1})
   return z
 end
 
-function (R::FmpzModPolyRing)(arr::Array{Generic.Res{fmpz}, 1})
+function (R::FmpzModPolyRing)(arr::Array{fmpz_mod, 1})
   if length(arr) > 0
      (base_ring(R) != parent(arr[1])) && error("Wrong parents")
   end
@@ -982,7 +984,7 @@ end
 #
 ################################################################################
 
-function PolynomialRing(R::Generic.ResRing{fmpz}, s::AbstractString; cached=true)
+function PolynomialRing(R::FmpzModRing, s::AbstractString; cached=true)
    parent_obj = FmpzModPolyRing(R, Symbol(s), cached)
 
    return parent_obj, parent_obj([R(0), R(1)])

@@ -11,11 +11,11 @@ using Libdl
 using Random
 
 import Base: Array, abs, acos, acosh, asin, asinh, atan, atanh,
-             bin, ceil, checkbounds, conj, convert, cmp, cos, cosh,
+             bin, binomial, ceil, checkbounds, conj, convert, cmp, cos, cosh,
              cospi, cot, coth, dec, deepcopy, deepcopy_internal, denominator,
-             div, divrem, expm1, exp, floor, gcd, gcdx, getindex,
-             hash, hcat, hex, hypot, intersect, inv, invmod, isequal,
-             isfinite, isinteger, isless, isqrt, isreal, iszero, lcm, ldexp, length,
+             div, divrem, expm1, exp, factorial, floor, gcd, gcdx, getindex,
+             hash, hcat, hex, hypot, intersect, inv, invmod, isequal, iseven,
+             isfinite, isinteger, isless, isodd, isqrt, isreal, iszero, lcm, ldexp, length,
              log, log1p, mod, ndigits, numerator, oct, one, parent, parse, precision,
              rand, Rational, rem, reverse,
              setindex!, show, similar, sign, sin, sinh, sinpi, size, sqrt, string,
@@ -295,7 +295,7 @@ end
 #
 ################################################################################
 
-version() = v"0.14.3"
+version() = v"0.15.2-dev"
 
 function versioninfo()
   print("Nemo version $(version())\n")
@@ -355,6 +355,8 @@ export Generic
 #
 ###############################################################################
 
+include("embedding/EmbeddingTypes.jl")
+
 include("flint/FlintTypes.jl")
 
 include("antic/AnticTypes.jl")
@@ -364,6 +366,8 @@ include("arb/ArbTypes.jl")
 #include("ambiguities.jl") # remove ambiguity warnings
 
 include("flint/adhoc.jl")
+
+include("embedding/embedding.jl")
 
 include("Rings.jl")
 
@@ -438,7 +442,7 @@ function test_module(x, y)
    end
 
    cmd = "using Test; using Nemo; include(\"$test_file\"); $test_function_name();"
-   @info("spawning ", `$julia_exe -e \"$cmd\"`)
+   println("spawning ", `$julia_exe -e \"$cmd\"`)
    run(`$julia_exe -e $cmd`)
 end
 

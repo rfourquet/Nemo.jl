@@ -14,9 +14,11 @@ include("flint/gfp_poly.jl")
 
 include("flint/nmod.jl")
 
+include("flint/fmpz_mod.jl")
+
 include("flint/gfp_elem.jl")
 
-include("flint/fmpz_mod.jl")
+include("flint/gfp_fmpz_elem.jl")
 
 include("flint/fmpz_mod_poly.jl")
 
@@ -47,6 +49,8 @@ include("flint/fmpz_mat.jl")
 include("flint/fmpq_mat.jl")
 
 include("flint/nmod_mat.jl")
+
+include("flint/fmpz_mod_mat.jl")
 
 include("flint/gfp_mat.jl")
 
